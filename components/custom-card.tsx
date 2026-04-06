@@ -1,54 +1,51 @@
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { auth, signIn, signOut } from "@/auth"
+
+function AuthForm({ action, label }: { action: () => Promise<void>, label: string }) {
+    return (
+        <form action={action} className="w-full">
+            
+            <Button variant="outline" size="lg" className="w-full h-10" type="submit">
+                 <img src="/Github.svg" className="w-6 h-6 rounded-2xl " alt="github icon" />
+                {label}
+            </Button>
+        </form>
+    )
+}
 
 export async function ProfileCard() {
     const session = await auth()
+    const user = session?.user  
 
     return (
         <Card className="mx-auto w-full max-w-sm">
             <CardHeader>
+               
                 <Avatar>
-                    <AvatarImage src={session?.user?.image || ""} />
-                    <AvatarFallback>{session?.user?.name?.[0] || "U"}</AvatarFallback>
+                    <AvatarImage src={user?.image || ""} />
+                    <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
                 </Avatar>
-                <CardTitle>{session?.user?.name || "Guest"}</CardTitle>
-                <CardDescription>
-                    {session?.user?.email || "No email"}
-                </CardDescription>
+                <CardTitle>{user?.name || "Guest"}</CardTitle>
+                <CardDescription>{user?.email || "No email"}</CardDescription>
             </CardHeader>
+
             <CardContent>
-                <p>
-                    {session ? "You're logged in successfully!" : "Click to sign in with GitHub"}
-                </p>
+                <p>{session ? "You're logged in successfully!" : "Click to sign in with GitHub"}</p>
             </CardContent>
+
             <CardFooter>
                 {session ? (
-                    <form action={async () => {
-                        "use server"
-                        await signOut()
-                    }} className="w-full">
-                        <Button variant="outline" size="sm" className="w-full" type="submit">
-                            Sign Out
-                        </Button>
-                    </form>
+                    <AuthForm
+                        action={async () => { "use server"; await signOut() }}
+                        label="Sign Out"
+                    />
                 ) : (
-                    <form action={async () => {
-                        "use server"
-                        await signIn("github")
-                    }} className="w-full">
-                        <Button variant="outline" size="sm" className="w-full" type="submit">
-                            Sign In with GitHub
-                        </Button>
-                    </form>
+                    <AuthForm
+                        action={async () => { "use server"; await signIn("github") }}
+                        label="Sign In with GitHub"
+                    />
                 )}
             </CardFooter>
         </Card>
